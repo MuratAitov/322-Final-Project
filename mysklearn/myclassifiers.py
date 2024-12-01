@@ -426,17 +426,18 @@ class MyDecisionTreeClassifier:
         return tree
 
     def _majority_vote(self, labels):
-        """Returns the majority label from a list of labels."""
-        label_counts = Counter(labels)
-        majority_label = None
-        max_count = -1
+            """Returns the majority label from a list of labels."""
+            label_counts = Counter(labels)
+            majority_label = None
+            max_count = -1
 
-        for label, count in label_counts.items():
-            if count > max_count or (count == max_count and label < majority_label):
-                majority_label = label
-                max_count = count
+            for label, count in label_counts.items():
+                if count > max_count or (count == max_count and label < majority_label):
+                    majority_label = label
+                    max_count = count
 
-        return majority_label
+            return majority_label
+
 
     def _select_best_attribute(self, data, attributes):
         """Selects the attribute with the highest information gain."""
@@ -581,3 +582,112 @@ class MyDecisionTreeClassifier:
         # Save the graph to .dot and .pdf
         dot.render(filename=dot_fname, cleanup=True)
         print(f"Tree visual saved to {dot_fname}.dot and {pdf_fname}.pdf")
+
+class MyRandomForestClassifier:
+    """Represents a random forest classifier.
+
+    Attributes:
+        N (int): The number of trees in the forest.
+        M (int): The minimum number of samples required to split an internal node.
+        F (int): The number of features to consider when looking for the best split.
+        decision_trees (list): The list of decision trees in the forest.
+        bootstraps_datasets (list): The list of bootstrap datasets for each tree.
+        bootstraps_labels (list): The list of labels for each bootstrap dataset.
+    """
+
+    def __init__(self, N=20, M=7, F=2):
+        """Initializer for MyRandomForestClassifier.
+
+        Args:
+            N (int): The number of trees in the forest.
+            M (int): The minimum number of samples required to split an internal node.
+            F (int): The number of features to consider when looking for the best split.
+        """
+        self.N = N
+        self.M = M
+        self.F = F
+        self.decision_trees = []
+        self.bootstraps_datasets = []
+        self.bootstraps_labels = []
+        self.y_train = None  # Добавлено для сохранения обучающих меток
+
+    def fit(self, X_train, y_train):
+        """Fits the random forest classifier to the training data.
+
+        Args:
+            X_train (list of list of obj): The training data features.
+            y_train (list of obj): The training data labels.
+        """
+        self.X_train = X_train  # Сохраняем обучающие данные (по желанию)
+        self.y_train = y_train  # Сохраняем обучающие метки
+        self.decision_trees = []
+        self.bootstraps_datasets = []
+        self.bootstraps_labels = []
+        for _ in range(self.N):
+            bootstrap_data, bootstrap_labels = self._bootstrapping(X_train, y_train)
+            self.bootstraps_datasets.append(bootstrap_data)
+            self.bootstraps_labels.append(bootstrap_labels)
+            features_indices = random.sample(range(len(X_train[0])), self.F)
+            bootstrap_data_sub = [[row[i] for i in features_indices] for row in bootstrap_data]
+            tree = MyDecisionTreeClassifier()
+            tree.fit(bootstrap_data_sub, bootstrap_labels)
+            tree.selected_features = features_indices
+            self.decision_trees.append(tree)
+
+    def predict(self, X_test):
+        """Predicts the labels for the test data.
+
+        Args:
+            X_test (list of list of obj): The test data features.
+
+        Returns:
+            y_predicted (list of obj): The predicted labels.
+        """
+        predictions = []
+        for tree in self.decision_trees:
+            X_test_sub = [[row[i] for i in tree.selected_features] for row in X_test]
+            y_pred = tree.predict(X_test_sub)
+            predictions.append(y_pred)
+        y_predicted = self._majority_vote(predictions)
+        return y_predicted
+
+    def _bootstrapping(self, X_train, y_train):
+        """Creates a bootstrap sample from the training data.
+
+        Args:
+            X_train (list of list of obj): The training data features.
+            y_train (list of obj): The training data labels.
+
+        Returns:
+            bootstrap_dataset (list of list of obj): The bootstrap sample features.
+            bootstrap_labels (list of obj): The bootstrap sample labels.
+        """
+        n_samples = len(X_train)
+        bootstrap_dataset = []
+        bootstrap_labels = []
+        for _ in range(n_samples):
+            index = random.randint(0, n_samples - 1)
+            bootstrap_dataset.append(X_train[index])
+            bootstrap_labels.append(y_train[index])
+        return bootstrap_dataset, bootstrap_labels
+
+    def _majority_vote(self, predictions):
+        """Aggregates the predictions from multiple trees using majority vote.
+
+        Args:
+            predictions (list of list of obj): The list of predictions from each tree.
+
+        Returns:
+            final_predictions (list of obj): The aggregated predictions.
+        """
+        final_predictions = []
+        n_samples = len(predictions[0])
+        for i in range(n_samples):
+            votes = [pred[i] for pred in predictions if pred[i] is not None]
+            if votes:
+                majority_vote = Counter(votes).most_common(1)[0][0]
+            else:
+                # Если все предсказания None, используем наиболее частый класс из обучающих меток
+                majority_vote = Counter(self.y_train).most_common(1)[0][0]
+            final_predictions.append(majority_vote)
+        return final_predictions
