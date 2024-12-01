@@ -91,6 +91,24 @@ class MyPyTable:
 
         return column
 
+    def encode_categorical_columns(self):
+        """Encodes categorical columns into numerical values."""
+        encoders = {}
+
+        for col_name in self.column_names:
+            col_index = self.column_names.index(col_name)
+            unique_values = set(str(row[col_index]) for row in self.data)
+
+            value_to_num = {value: idx for idx, value in enumerate(sorted(unique_values))}
+            encoders[col_name] = value_to_num
+
+            for row in self.data:
+                row[col_index] = value_to_num[str(row[col_index])]
+
+        return encoders
+
+
+
     def get_data_types(self):
         """Infers and returns the data type for each column in the table.
 
@@ -293,6 +311,18 @@ class MyPyTable:
             self.data[i][col_id] = avg
 
         return self
+
+    def replace_na_with_mean(self, column_name):
+        if column_name not in self.column_names:
+            raise ValueError(f"Column {column_name} not found!")
+        col_idx = self.column_names.index(column_name)
+
+        values = [float(row[col_idx]) for row in self.data if row[col_idx] != "NA"]
+        mean_value = sum(values) / len(values) if values else 0
+
+        for row in self.data:
+            if row[col_idx] == "NA":
+                row[col_idx] = mean_value
 
     def compute_summary_statistics(self, col_names):
         """Calculates summary stats for this MyPyTable and stores the stats in a new MyPyTable.

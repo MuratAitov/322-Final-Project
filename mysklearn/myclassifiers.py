@@ -120,26 +120,27 @@ class MyKNeighborsClassifier:
         self.y_train = y_train
 
     def kneighbors(self, X_test):
-        """Determines the k closes neighbors of each test instance.
-
-        Args:
-            X_test(list of list of numeric vals): The list of testing samples
-                The shape of X_test is (n_test_samples, n_features)
-
-        Returns:
-            distances(list of list of float): 2D list of k nearest neighbor distances
-                for each instance in X_test
-            neighbor_indices(list of list of int): 2D list of k nearest neighbor
-                indices in X_train (parallel to distances)
-        """
-
+        """Determines the k closest neighbors of each test instance."""
         neighbor_indices = []
         distances = []
-        for test_instance in X_test:
+        for test_idx, test_instance in enumerate(X_test):
             current_distances = []
             for i, train_instance in enumerate(self.X_train):
-                dist = np.linalg.norm(np.array(test_instance) - np.array(train_instance))
-                current_distances.append((dist, i))
+                try:
+                    test_instance = [float(x) for x in test_instance]
+                    train_instance = [float(x) for x in train_instance]
+
+                    dist = np.linalg.norm(np.array(test_instance) - np.array(train_instance))
+                    current_distances.append((dist, i))
+                except ValueError as ve:
+                    print(f"Ошибка преобразования данных в число:")
+                    print(f"Test instance: {test_instance}")
+                    print(f"Train instance: {train_instance}")
+                    print(f"Ошибка: {ve}")
+                    raise ve
+                except Exception as e:
+                    print(f"Неизвестная ошибка на тестовом элементе {test_idx} и тренировочном элементе {i}: {e}")
+                    raise e
             current_distances.sort(key=lambda x: x[0])
             k_nearest = current_distances[:self.n_neighbors]
             neighbor_indices.append([index for _, index in k_nearest])
@@ -399,7 +400,6 @@ class MyDecisionTreeClassifier:
         self.tree = self._treebuilder(data, list(range(len(X_train[0]))))
 
     def _treebuilder(self, data, available_attributes, parent_size=None):
-        """Рекурсивная функция для построения дерева решений."""
         labels = [row[-1] for row in data]
 
         if len(set(labels)) == 1:
@@ -411,7 +411,15 @@ class MyDecisionTreeClassifier:
 
         best_attr = self._select_best_attribute(data, available_attributes)
         tree = ["Attribute", f"att{best_attr}"]
-        attr_values = sorted(set(row[best_attr] for row in data))
+
+        # Debugging: Проверить содержимое столбца
+        try:
+            attr_values = sorted(set(row[best_attr] for row in data))
+        except TypeError as e:
+            print(f"Ошибка в столбце: {best_attr}")
+            print(f"Значения в столбце: {[row[best_attr] for row in data]}")
+            raise e
+
         available_attributes.remove(best_attr)
 
         for value in attr_values:
