@@ -1,14 +1,19 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from predict import train_model, make_prediction
 
 # Initialize the Flask app
 app = Flask(__name__)
 
+# Define the home endpoint
+@app.route('/')
+def home():
+    return render_template('index.html')
+
 # Define the prediction endpoint
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get the input data from the request
+        # Get the input data from the form
         input_data = request.json
 
         # Pass the input data to the make_prediction function

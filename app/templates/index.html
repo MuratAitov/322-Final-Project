@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction API</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        async function makePrediction() {
+            // Собираем данные с формы
+            const inputData = {
+                gender: document.getElementById('gender').value,
+                SeniorCitizen: parseInt(document.getElementById('SeniorCitizen').value),
+                Partner: document.getElementById('Partner').value,
+                Dependents: document.getElementById('Dependents').value,
+                tenure: parseInt(document.getElementById('tenure').value),
+                PhoneService: document.getElementById('PhoneService').value,
+                MultipleLines: document.getElementById('MultipleLines').value,
+                InternetService: document.getElementById('InternetService').value,
+                OnlineSecurity: document.getElementById('OnlineSecurity').value,
+                OnlineBackup: document.getElementById('OnlineBackup').value,
+                DeviceProtection: document.getElementById('DeviceProtection').value,
+                TechSupport: document.getElementById('TechSupport').value,
+                StreamingTV: document.getElementById('StreamingTV').value,
+                StreamingMovies: document.getElementById('StreamingMovies').value,
+                Contract: document.getElementById('Contract').value,
+                PaperlessBilling: document.getElementById('PaperlessBilling').value,
+                PaymentMethod: document.getElementById('PaymentMethod').value,
+                MonthlyCharges: parseFloat(document.getElementById('MonthlyCharges').value),
+                TotalCharges: parseFloat(document.getElementById('TotalCharges').value)
+            };
+
+            // Отправляем данные на сервер
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(inputData)
+            });
+
+            const result = await response.json();
+
+            // Отображаем результат
+            document.getElementById('result').innerText = result.prediction
+                ? `Prediction: ${result.prediction}`
+                : `Error: ${result.error}`;
+        }
+    </script>
+</head>
+<body>
+    <h1>Prediction API</h1>
+    <form onsubmit="event.preventDefault(); makePrediction();">
+        <label for="gender">Gender:</label>
+        <input type="text" id="gender" required><br>
+
+        <label for="SeniorCitizen">Senior Citizen (0 or 1):</label>
+        <input type="number" id="SeniorCitizen" required><br>
+
+        <label for="Partner">Partner:</label>
+        <input type="text" id="Partner" required><br>
+
+        <label for="Dependents">Dependents:</label>
+        <input type="text" id="Dependents" required><br>
+
+        <label for="tenure">Tenure:</label>
+        <input type="number" id="tenure" required><br>
+
+        <label for="PhoneService">Phone Service:</label>
+        <input type="text" id="PhoneService" required><br>
+
+        <label for="MultipleLines">Multiple Lines:</label>
+        <input type="text" id="MultipleLines" required><br>
+
+        <label for="InternetService">Internet Service:</label>
+        <input type="text" id="InternetService" required><br>
+
+        <label for="OnlineSecurity">Online Security:</label>
+        <input type="text" id="OnlineSecurity" required><br>
+
+        <label for="OnlineBackup">Online Backup:</label>
+        <input type="text" id="OnlineBackup" required><br>
+
+        <label for="DeviceProtection">Device Protection:</label>
+        <input type="text" id="DeviceProtection" required><br>
+
+        <label for="TechSupport">Tech Support:</label>
+        <input type="text" id="TechSupport" required><br>
+
+        <label for="StreamingTV">Streaming TV:</label>
+        <input type="text" id="StreamingTV" required><br>
+
+        <label for="StreamingMovies">Streaming Movies:</label>
+        <input type="text" id="StreamingMovies" required><br>
+
+        <label for="Contract">Contract:</label>
+        <input type="text" id="Contract" required><br>
+
+        <label for="PaperlessBilling">Paperless Billing:</label>
+        <input type="text" id="PaperlessBilling" required><br>
+
+        <label for="PaymentMethod">Payment Method:</label>
+        <input type="text" id="PaymentMethod" required><br>
+
+        <label for="MonthlyCharges">Monthly Charges:</label>
+        <input type="number" step="0.01" id="MonthlyCharges" required><br>
+
+        <label for="TotalCharges">Total Charges:</label>
+        <input type="number" step="0.01" id="TotalCharges" required><br>
+
+        <button type="submit">Predict</button>
+    </form>
+    <p id="result"></p>
+</body>
+</html>
