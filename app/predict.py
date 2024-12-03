@@ -1,11 +1,14 @@
 import sys
 import os
+
+# Add the path to the mysklearn folder
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "mysklearn")))
+
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from mysklearn.myclassifiers import MyKNeighborsClassifier
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+# Load the data
 data = pd.read_csv('data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
 
 label_encoders = {}
@@ -51,32 +54,3 @@ def train_model():
 def make_prediction(input_data):
     input_df = preprocess_data(pd.DataFrame([input_data]))
     return model.predict(input_df.values.tolist())[0]
-
-if __name__ == "__main__":
-
-    train_model()
-
-    test_input = {
-        "gender": "Female",
-        "SeniorCitizen": 0,
-        "Partner": "Yes",
-        "Dependents": "No",
-        "tenure": 10,
-        "PhoneService": "Yes",
-        "MultipleLines": "No",
-        "InternetService": "DSL",
-        "OnlineSecurity": "No",
-        "OnlineBackup": "Yes",
-        "DeviceProtection": "No",
-        "TechSupport": "No",
-        "StreamingTV": "No",
-        "StreamingMovies": "No",
-        "Contract": "Month-to-month",
-        "PaperlessBilling": "Yes",
-        "PaymentMethod": "Electronic check",
-        "MonthlyCharges": 29.85,
-        "TotalCharges": 29.85
-    }
-
-    prediction = make_prediction(test_input)
-    print(f"Prediction for test input: {'Yes' if prediction == 1 else 'No'}")
