@@ -108,6 +108,34 @@ class MyPyTable:
         return encoders
 
 
+    def update_column(self, column_name, new_values):
+        col_index = self.column_names.index(column_name)
+        for i, row in enumerate(self.data):
+            row[col_index] = new_values[i]
+
+    def drop_columns(self, columns_to_drop):
+        """
+        Removes specified columns from the table.
+
+        Args:
+            columns_to_drop (list of str): List of column names to remove.
+
+        Returns:
+            MyPyTable: A new MyPyTable instance with the specified columns removed.
+        """
+        drop_indices = [self.column_names.index(col) for col in columns_to_drop]
+
+        new_column_names = [
+            col for i, col in enumerate(self.column_names) if i not in drop_indices
+        ]
+
+        new_data = [
+            [value for i, value in enumerate(row) if i not in drop_indices]
+            for row in self.data
+        ]
+
+        return MyPyTable(column_names=new_column_names, data=new_data)
+
 
     def get_data_types(self):
         """Infers and returns the data type for each column in the table.
