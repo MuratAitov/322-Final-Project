@@ -50,61 +50,133 @@
     <h1>Prediction API</h1>
     <form onsubmit="event.preventDefault(); makePrediction();">
         <label for="gender">Gender:</label>
-        <input type="text" id="gender" required><br>
+        <select id="gender" required>
+            <option value="" disabled selected>Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select><br>
 
         <label for="SeniorCitizen">Senior Citizen (0 or 1):</label>
         <input type="number" id="SeniorCitizen" required><br>
 
         <label for="Partner">Partner:</label>
-        <input type="text" id="Partner" required><br>
+        <select id="Partner" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
         <label for="Dependents">Dependents:</label>
-        <input type="text" id="Dependents" required><br>
+        <select id="Dependents" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
+        <!-- Numeric input for tenure -->
         <label for="tenure">Tenure:</label>
         <input type="number" id="tenure" required><br>
 
         <label for="PhoneService">Phone Service:</label>
-        <input type="text" id="PhoneService" required><br>
+        <select id="PhoneService" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
         <label for="MultipleLines">Multiple Lines:</label>
-        <input type="text" id="MultipleLines" required><br>
+        <select id="MultipleLines" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="No phone service">No phone service</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
         <label for="InternetService">Internet Service:</label>
-        <input type="text" id="InternetService" required><br>
+        <select id="InternetService" required>
+            <option value="" disabled selected>Select</option>
+            <option value="DSL">DSL</option>
+            <option value="Fiber optic">Fiber optic</option>
+            <option value="No">No</option>
+        </select><br>
 
         <label for="OnlineSecurity">Online Security:</label>
-        <input type="text" id="OnlineSecurity" required><br>
+        <select id="OnlineSecurity" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="No internet service">No internet service</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
         <label for="OnlineBackup">Online Backup:</label>
-        <input type="text" id="OnlineBackup" required><br>
+        <select id="OnlineBackup" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="No internet service">No internet service</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
         <label for="DeviceProtection">Device Protection:</label>
-        <input type="text" id="DeviceProtection" required><br>
+        <select id="DeviceProtection" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="No internet service">No internet service</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
         <label for="TechSupport">Tech Support:</label>
-        <input type="text" id="TechSupport" required><br>
+        <select id="TechSupport" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="No internet service">No internet service</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
         <label for="StreamingTV">Streaming TV:</label>
-        <input type="text" id="StreamingTV" required><br>
+        <select id="StreamingTV" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="No internet service">No internet service</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
         <label for="StreamingMovies">Streaming Movies:</label>
-        <input type="text" id="StreamingMovies" required><br>
+        <select id="StreamingMovies" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="No internet service">No internet service</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
         <label for="Contract">Contract:</label>
-        <input type="text" id="Contract" required><br>
+        <select id="Contract" required>
+            <option value="" disabled selected>Select</option>
+            <option value="Month-to-month">Month-to-month</option>
+            <option value="One year">One year</option>
+            <option value="Two year">Two year</option>
+        </select><br>
 
         <label for="PaperlessBilling">Paperless Billing:</label>
-        <input type="text" id="PaperlessBilling" required><br>
+        <select id="PaperlessBilling" required>
+            <option value="" disabled selected>Select</option>
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+        </select><br>
 
-        <label for="PaymentMethod">Payment Method:</label>
-        <input type="text" id="PaymentMethod" required><br>
+        <label for='PaymentMethod'>PaymentMethod:</label>
+        <select id='PaymentMethod' required>
+            <option value='' disabled selected>Select</option>
+            <option value='Bank transfer (automatic)'>Bank transfer (automatic)</option>
+            <option value='Credit card (automatic)'>Credit card (automatic)</option>
+            <option value='Electronic check'>Electronic check</option>
+            <option value='Mailed check'>Mailed check</option>
+        </select><br>
 
         <label for="MonthlyCharges">Monthly Charges:</label>
         <input type="number" step="0.01" id="MonthlyCharges" required><br>
 
         <label for="TotalCharges">Total Charges:</label>
-        <input type="number" step="0.01" id="TotalCharges" required><br>
+        <input type="number" step="0.01" id="TotalCharges" required><br>" required><br>
 
         <button type="submit">Predict</button>
     </form>

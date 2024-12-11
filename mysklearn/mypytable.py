@@ -68,8 +68,6 @@ class MyPyTable:
         """
 
         column = []
-
-        # Identify the column index based on the identifier (name or index)
         if isinstance(col_identifier, str):
             try:
                 column_id = self.column_names.index(col_identifier)
