@@ -118,14 +118,3 @@ if __name__ == "__main__":
 
     prediction = make_prediction(test_input)
     print(f"Prediction for test input: {'Yes' if prediction == 1 else 'No'}")
-
-    categorical_columns = [
-    "gender", "Partner", "Dependents", "PhoneService", "MultipleLines",
-    "InternetService", "OnlineSecurity", "OnlineBackup", "DeviceProtection",
-    "TechSupport", "StreamingTV", "StreamingMovies", "Contract",
-    "PaperlessBilling", "PaymentMethod"
-    ]
-
-    # Get unique values for each categorical column
-    unique_values = {col: set(table.get_column(col)) for col in categorical_columns}
-    print(unique_values)
