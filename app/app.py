@@ -1,6 +1,6 @@
 import random
 from flask import Flask, request, jsonify, render_template
-from .predict import train_model, make_prediction
+from predict import train_model, make_prediction
 
 app = Flask(__name__)
 
