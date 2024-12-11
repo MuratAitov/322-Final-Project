@@ -61,14 +61,12 @@ def preprocess_data(table):
     return encoders, min_max_scalers
 
 
-# Train the KNN model
 def train_model():
     global knn_model, encoders, min_max_scalers
 
     processed_table = MyPyTable(column_names=table.column_names, data=[row[:] for row in table.data])
     encoders, min_max_scalers = preprocess_data(processed_table)
 
-    # Remove the "Churn" and "customerID" columns
     X_table = processed_table.drop_columns(["Churn", "customerID"])
     X = X_table.data
     y = [1 if label == "Yes" else 0 for label in table.get_column("Churn")]
