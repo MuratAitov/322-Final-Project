@@ -4,7 +4,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from mysklearn.mypytable import MyPyTable
-from mysklearn.myclassifiers import MyKNeighborsClassifier
+from mysklearn.myclassifiers import MyNaiveBayesClassifier
 
 data_path = os.path.join(os.path.dirname(__file__), "..", "data", "WA_Fn-UseC_-Telco-Customer-Churn.csv")
 table = MyPyTable()
@@ -14,15 +14,55 @@ categorical_columns = [
     "gender", "Partner", "Dependents", "PhoneService", "MultipleLines",
     "InternetService", "OnlineSecurity", "OnlineBackup", "DeviceProtection",
     "TechSupport", "StreamingTV", "StreamingMovies", "Contract",
-    "PaperlessBilling", "PaymentMethod"
+    "PaperlessBilling", "PaymentMethod", "Tenure_c", "MonthlyCharges_c", "TotalCharges_c"
 ]
-numeric_columns = ["tenure", "MonthlyCharges", "TotalCharges"]
 
-knn_model = None
-encoders = None
-min_max_scalers = None
+# Functions for discretization
+def categorize_tenure(value):
+    if value <= 12:
+        return "New"
+    elif value <= 24:
+        return "Short-term"
+    elif value <= 48:
+        return "Mid-term"
+    else:
+        return "Long-term"
+
+def categorize_monthly_charges(value):
+    if value <= 40:
+        return "Low"
+    elif value <= 80:
+        return "Medium"
+    else:
+        return "High"
+
+def categorize_total_charges(value):
+    try:
+        value = float(value)
+        if value <= 2000:
+            return "Low"
+        elif value <= 5000:
+            return "Medium"
+        else:
+            return "High"
+    except ValueError:
+        return "Unknown"  # Or handle as appropriate for your model
+
+def discretize_data(table):
+    tenure_data = table.get_column("tenure", include_missing_values=False)
+    monthly_charges_data = table.get_column("MonthlyCharges", include_missing_values=False)
+    total_charges_data = table.get_column("TotalCharges", include_missing_values=False)
+
+    tenure_c = [categorize_tenure(float(value)) for value in tenure_data]
+    monthly_charges_c = [categorize_monthly_charges(float(value)) for value in monthly_charges_data]
+    total_charges_c = [categorize_total_charges(value) for value in total_charges_data]
 
 
+    table.column_names.extend(["Tenure_c", "MonthlyCharges_c", "TotalCharges_c"])
+    for i, row in enumerate(table.data):
+        row.extend([tenure_c[i], monthly_charges_c[i], total_charges_c[i]])
+
+# Encode categorical data
 def encode_categorical(table, columns):
     encoders = {}
     for col in columns:
@@ -32,62 +72,47 @@ def encode_categorical(table, columns):
         table.update_column(col, [encoders[col][value] for value in column_data])
     return encoders
 
-
-def normalize_numerical(table, columns):
-    min_max_values = {}
-    for col in columns:
-        column_data = table.get_column(col)
-
-        numeric_data = []
-        for value in column_data:
-            try:
-                numeric_data.append(float(value))
-            except ValueError:
-                numeric_data.append(0.0)
-
-        min_val, max_val = min(numeric_data), max(numeric_data)
-        min_max_values[col] = (min_val, max_val)
-
-        normalized_values = [
-            (value - min_val) / (max_val - min_val) if max_val != min_val else 0.0
-            for value in numeric_data
-        ]
-        table.update_column(col, normalized_values)
-    return min_max_values
+naive_bayes_model = None
+encoders = None
 
 def preprocess_data(table):
+    discretize_data(table)
     encoders = encode_categorical(table, categorical_columns)
-    min_max_scalers = normalize_numerical(table, numeric_columns)
-    return encoders, min_max_scalers
-
-
+    return encoders
 def train_model():
-    global knn_model, encoders, min_max_scalers
+    global naive_bayes_model, encoders, feature_names
 
+    # Preprocess the data
     processed_table = MyPyTable(column_names=table.column_names, data=[row[:] for row in table.data])
-    encoders, min_max_scalers = preprocess_data(processed_table)
+    encoders = preprocess_data(processed_table)
 
-    X_table = processed_table.drop_columns(["Churn", "customerID"])
+    # Drop irrelevant columns
+    X_table = processed_table.drop_columns(["Churn", "customerID", "tenure", "MonthlyCharges", "TotalCharges"])
     X = X_table.data
     y = [1 if label == "Yes" else 0 for label in table.get_column("Churn")]
 
-    knn_model = MyKNeighborsClassifier(n_neighbors=3)
-    knn_model.feature_names = X_table.column_names
-    knn_model.fit(X, y)
+    # Store feature names
+    feature_names = X_table.column_names
 
+    # Train the Naive Bayes classifier
+    naive_bayes_model = MyNaiveBayesClassifier()
+    naive_bayes_model.fit(X, y)
 
 def make_prediction(input_data):
-    global knn_model, encoders, min_max_scalers
+    global naive_bayes_model, encoders, feature_names
 
+    # Apply discretization
+    input_data["Tenure_c"] = categorize_tenure(input_data["tenure"])
+    input_data["MonthlyCharges_c"] = categorize_monthly_charges(input_data["MonthlyCharges"])
+    input_data["TotalCharges_c"] = categorize_total_charges(input_data["TotalCharges"])
+
+    # Encode input data
     for col, encoder in encoders.items():
         input_data[col] = encoder[input_data[col]]
 
-    for col, (min_val, max_val) in min_max_scalers.items():
-        input_data[col] = (input_data[col] - min_val) / (max_val - min_val)
-
-    input_row = [input_data[col] for col in knn_model.feature_names]
-    return knn_model.predict([input_row])[0]
-
+    # Prepare the input row based on feature names
+    input_row = [input_data[col] for col in feature_names]
+    return naive_bayes_model.predict([input_row])[0]
 
 if __name__ == "__main__":
     train_model()
@@ -106,9 +131,9 @@ if __name__ == "__main__":
         "DeviceProtection": "No",
         "TechSupport": "No",
         "StreamingTV": "No",
-        "StreamingMovies": "No",
+        "StreamingMovies": "Yes",
         "Contract": "Month-to-month",
-        "PaperlessBilling": "Yes",
+        "PaperlessBilling": "No",
         "PaymentMethod": "Electronic check",
         "MonthlyCharges": 29.85,
         "TotalCharges": 29.85
