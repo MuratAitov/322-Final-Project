@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from .predict import train_model, make_prediction
+from predict import train_model, make_prediction
 
 
 # Initialize the Flask app
@@ -31,4 +31,4 @@ if __name__ == '__main__':
     train_model()
 
     # Run the app on the local development server
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
